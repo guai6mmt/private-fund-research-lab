@@ -824,6 +824,102 @@ button {
   height: auto;
 }
 
+.strategy-capability,
+.tactical-capability {
+  cursor: default;
+}
+
+.strategy-chart-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.ability-metric-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.ability-metric-card {
+  min-height: 148px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfdff;
+  padding: 14px;
+  text-align: left;
+}
+
+.ability-metric-card:hover {
+  border-color: var(--blue);
+  background: var(--blue-2);
+}
+
+.ability-metric-card small,
+.ability-metric-card b,
+.ability-metric-card strong,
+.ability-metric-card span {
+  display: block;
+}
+
+.ability-metric-card small {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.ability-metric-card b {
+  margin-top: 7px;
+  color: #37527a;
+  font-size: 15px;
+  font-weight: 950;
+}
+
+.ability-metric-card strong {
+  margin-top: 12px;
+  color: var(--ink);
+  font-size: 28px;
+  line-height: 1;
+  font-weight: 950;
+}
+
+.ability-metric-card span {
+  margin-top: 10px;
+  color: #51617d;
+  font-size: 13px;
+  line-height: 1.45;
+  font-weight: 720;
+}
+
+.qualitative-analysis {
+  margin-top: 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: linear-gradient(180deg, #fff, #f7fbff);
+  padding: 15px 16px;
+}
+
+.qualitative-analysis b,
+.qualitative-analysis span {
+  display: block;
+}
+
+.qualitative-analysis b {
+  color: var(--ink);
+  font-size: 16px;
+  font-weight: 950;
+}
+
+.qualitative-analysis span {
+  margin-top: 8px;
+  color: #51617d;
+  line-height: 1.65;
+  font-size: 13px;
+  font-weight: 720;
+}
+
 .detail-list.compact {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
@@ -1016,26 +1112,32 @@ button {
 
 .pool-summary-grid {
   display: grid;
-  grid-template-columns: minmax(360px, 0.9fr) minmax(0, 1.1fr);
+  grid-template-columns: minmax(320px, 0.95fr) minmax(260px, 0.7fr) minmax(320px, 1fr);
   gap: 16px;
 }
 
 .type-card-grid,
-.pool-metric-grid {
+.pool-metric-grid,
+.special-product-grid {
   display: grid;
   gap: 10px;
 }
 
 .type-card-grid {
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .pool-metric-grid {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.special-product-grid {
+  grid-template-columns: 1fr;
 }
 
 .type-card,
-.pool-metric {
+.pool-metric,
+.special-product-card {
   min-height: 104px;
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -1046,13 +1148,15 @@ button {
 
 .type-card.active,
 .pool-metric:hover,
-.type-card:hover {
+.type-card:hover,
+.special-product-card:hover {
   border-color: var(--blue);
   background: var(--blue-2);
 }
 
 .type-card b,
-.pool-metric span {
+.pool-metric span,
+.special-product-card b {
   display: block;
   color: #37527a;
   font-size: 13px;
@@ -1070,7 +1174,8 @@ button {
 }
 
 .type-card span,
-.pool-metric small {
+.pool-metric small,
+.special-product-card span {
   display: block;
   margin-top: 9px;
   color: var(--muted);
@@ -1093,6 +1198,14 @@ button {
 
 .pool-metric em.warn {
   color: var(--orange);
+}
+
+.compare-chart-panel {
+  margin: 14px 0 16px;
+  padding: 12px;
+  border: 1px solid var(--soft-line);
+  border-radius: 8px;
+  background: #fbfdff;
 }
 
 .pool-list-head {
@@ -1421,6 +1534,30 @@ button {
 }
 
 .status-tag.info {
+  color: var(--blue);
+  background: var(--blue-2);
+}
+
+.status-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.mini-action {
+  min-height: 28px;
+  padding: 0 10px;
+  border: 1px solid #cbd8ea;
+  border-radius: 6px;
+  background: #f8fbff;
+  color: #264766;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.mini-action:hover {
+  border-color: var(--blue);
   color: var(--blue);
   background: var(--blue-2);
 }
@@ -1813,6 +1950,8 @@ td button {
   .tactical-grid,
   .strategy-visual-grid,
   .tactical-visual-grid,
+  .strategy-chart-grid,
+  .ability-metric-grid,
   .pool-metric-grid,
   .tactical-summary-strip,
   .detail-list.compact,
@@ -1883,6 +2022,8 @@ td button {
   .tactical-grid,
   .strategy-visual-grid,
   .tactical-visual-grid,
+  .strategy-chart-grid,
+  .ability-metric-grid,
   .pool-metric-grid,
   .type-card-grid,
   .tactical-summary-strip,
