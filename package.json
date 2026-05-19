@@ -1,9 +1,0 @@
-{
-  "name": "private-fund-research-lab",
-  "version": "0.1.0",
-  "private": true,
-  "description": "Static prototype for private fund product evaluation, manager research, and after-sales SOP workflows.",
-  "scripts": {
-    "test": "node tests/metrics.test.js"
-  }
-}
