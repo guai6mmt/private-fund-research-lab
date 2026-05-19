@@ -437,6 +437,7 @@ button { font-family: inherit; }
   width: 100%; border-collapse: collapse;
   font-size: 12.5px;
   min-width: 720px;
+  table-layout: auto;
 }
 .tbl thead th {
   background: #f8fafd;
@@ -448,6 +449,7 @@ button { font-family: inherit; }
   font-size: 11.5px;
   white-space: nowrap;
   position: sticky; top: 0; z-index: 1;
+  vertical-align: middle;
 }
 .tbl thead th.num-col { text-align: right; }
 .tbl tbody td {
@@ -458,15 +460,69 @@ button { font-family: inherit; }
 .tbl tbody td.num-col {
   text-align: right; font-family: var(--mono);
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 .tbl tbody tr:hover { background: #f7faff; }
 .tbl tbody tr:last-child td { border-bottom: none; }
 .tbl tbody tr.selected { background: var(--primary-soft); }
 .tbl .prod-cell {
   display: flex; flex-direction: column; gap: 2px;
+  min-width: 0;
 }
-.tbl .prod-name { font-weight: 600; color: var(--fg); font-size: 13px; }
+.tbl .prod-name {
+  font-weight: 600; color: var(--fg); font-size: 13px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
 .tbl .prod-code { font-size: 11px; color: var(--fg-4); font-family: var(--mono); }
+
+/* Column-rhythm helpers — apply to <th> to set widths consistently */
+.tbl th.col-tag,
+.tbl td.col-tag { width: 96px; white-space: nowrap; }
+.tbl th.col-num,
+.tbl td.col-num {
+  width: 96px; text-align: right;
+  font-family: var(--mono); font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.tbl th.col-num-wide,
+.tbl td.col-num-wide {
+  width: 110px; text-align: right;
+  font-family: var(--mono); font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.tbl th.col-action,
+.tbl td.col-action { width: 132px; white-space: nowrap; }
+.tbl th.col-mgr,
+.tbl td.col-mgr { width: 120px; white-space: nowrap; }
+.tbl th.col-level,
+.tbl td.col-level { width: 70px; text-align: center; }
+.tbl th.col-driver,
+.tbl td.col-driver { width: 86px; white-space: nowrap; }
+.tbl th.col-scene,
+.tbl td.col-scene { width: 110px; white-space: nowrap; }
+/* Long-text column: absorb remaining width with clean ellipsis */
+.tbl td.col-text {
+  color: var(--fg-2); font-size: 12px; line-height: 1.55;
+  max-width: 0;
+}
+.tbl td.col-text > .clamp-2 {
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+/* Consistent tag rendering inside tables */
+.tbl .tag {
+  display: inline-block;
+  min-width: 56px; text-align: center;
+}
+/* Soft zebra for dense tables */
+.tbl.zebra tbody tr:nth-child(even) { background: #fbfcfe; }
+.tbl.zebra tbody tr:nth-child(even):hover { background: #f3f7ff; }
+/* When a level pill is used directly in <td>, normalize it */
+.tbl .level-pill {
+  display: inline-block; padding: 2px 8px; border-radius: 3px;
+  font-size: 11px; font-weight: 600; color: #fff;
+  min-width: 28px; text-align: center;
+}
 
 /* === Buttons === */
 .btn {

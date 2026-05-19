@@ -201,9 +201,9 @@ function PageMgrTactical({ mgrId, setMgrId, openDrawer }) {
           <div className="muted txt-sm">日常市场中的表现</div>
         </div>
         <div className="grid grid-3">
-          {renderMetric("环境匹配度", c.env.match, "pct", "#0f5cff", "战术权重 vs 实际市场状态")}
-          {renderMetric("环境胜率", c.env.winRate, "pct", "#00a99d", "判断正确占比")}
-          {renderMetric("环境超额收益", c.env.alpha, "pct", "#14a065", "相对中枢年化超额")}
+          {renderMetric("环境匹配度", c.env.match, "pct", "#0f5cff", "")}
+          {renderMetric("环境胜率", c.env.winRate, "pct", "#00a99d", "")}
+          {renderMetric("环境超额收益", c.env.alpha, "pct", "#14a065", "")}
         </div>
       </div>
 
@@ -213,9 +213,9 @@ function PageMgrTactical({ mgrId, setMgrId, openDrawer }) {
           <div className="muted txt-sm">重大事件后的处理质量</div>
         </div>
         <div className="grid grid-3">
-          {renderMetric("事件响应度", c.evt.response, "pct", "#ff7a1a", "事件后 T+5 内调仓比例")}
-          {renderMetric("事件胜率", c.evt.winRate, "pct", "#6b4ce6", "响应后 30 日跑赢中枢")}
-          {renderMetric("事件超额收益", c.evt.alpha, "pct", "#ef3f3f", "响应后 90 日累计超额")}
+          {renderMetric("事件响应度", c.evt.response, "pct", "#ff7a1a", "")}
+          {renderMetric("事件胜率", c.evt.winRate, "pct", "#6b4ce6", "")}
+          {renderMetric("事件超额收益", c.evt.alpha, "pct", "#ef3f3f", "")}
         </div>
       </div>
 
@@ -308,7 +308,7 @@ function PageMgrOverview({ mgrId, setMgrId, onNav, openDrawer }) {
       <div className="section">
         <div className="section-header">
           <div className="section-title">能力总览 · 三大维度</div>
-          <div className="muted txt-sm">基于过去 24 个月滚动窗口数据 · 点击卡片查看详情</div>
+          <div className="muted txt-sm"></div>
         </div>
         <div className="grid" style={{ gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 12 }}>
           <Capability
@@ -317,7 +317,7 @@ function PageMgrOverview({ mgrId, setMgrId, onNav, openDrawer }) {
             gradient="linear-gradient(135deg, #0f5cff 0%, #0a47cc 100%)"
             route="mgr-strategy"
             kpis={[
-            { label: "基准累计", val: stratScore.toFixed(2) + "%" },
+            { label: "基准收益率", val: stratScore.toFixed(2) + "%" },
             { label: "基准最大回撤", val: stratDD.toFixed(2) + "%" }]
             } />
           
@@ -378,11 +378,9 @@ function PageMgrOverview({ mgrId, setMgrId, onNav, openDrawer }) {
           <div className="qual-title">系统结论</div>
           <div className="qual-body">{mgr.conclusion}</div>
         </div>
-        <div className="qual" style={{ background: "linear-gradient(135deg, #f8fafd 0%, #fff 100%)", border: "1px dashed var(--border-strong)" }}>
-          <div className="empty" style={{ padding: "20px 12px" }}>
-            <div className="icon">{Icons.empty}</div>
-            <div style={{ fontSize: 12 }}>暂时留白</div>
-          </div>
+        <div className="qual" style={{ background: "linear-gradient(135deg, #fff5f5 0%, #fff 100%)", borderColor: "var(--red-soft)" }}>
+          <div className="qual-title" style={{ color: "var(--red)" }}>主要风险</div>
+          <div className="qual-body">{mgr.risk}</div>
         </div>
       </div>
     </React.Fragment>);

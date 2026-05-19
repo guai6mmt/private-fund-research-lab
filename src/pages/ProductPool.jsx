@@ -11,9 +11,9 @@ function PageProductPool({ onNav, openDrawer, compareIds, addToCompare }) {
   const toast = useToast();
 
   const filtered = usePoolMemo(() => products.filter((p) =>
-    p.catId === catId &&
-    (mgrFilter === "all" || p.managerId === mgrFilter) &&
-    (!featFilter || (p.featured || []).includes(featFilter))
+  p.catId === catId && (
+  mgrFilter === "all" || p.managerId === mgrFilter) && (
+  !featFilter || (p.featured || []).includes(featFilter))
   ), [catId, mgrFilter, featFilter, products]);
 
   const catCounts = CATEGORIES.map((c) => ({
@@ -39,7 +39,7 @@ function PageProductPool({ onNav, openDrawer, compareIds, addToCompare }) {
   };
 
   const doImport = () => {
-    if (selected.size === 0) { toast.push("请先勾选产品", "warn"); return; }
+    if (selected.size === 0) {toast.push("请先勾选产品", "warn");return;}
     const arr = [...selected];
     arr.forEach((id) => addToCompare(id));
     toast.push(`已导入 ${arr.length} 只产品至产品对比`);
@@ -57,12 +57,6 @@ function PageProductPool({ onNav, openDrawer, compareIds, addToCompare }) {
             <div style={{ fontSize: 11, color: "var(--fg-3)", letterSpacing: 0.5, textTransform: "uppercase" }}>产品池</div>
             <div style={{ fontSize: 17, fontWeight: 600, marginTop: 2 }}>共 {products.length} 只在管产品 · 覆盖 {managers.length} 家管理人</div>
           </div>
-          <div style={{ display: "flex", gap: 28 }}>
-            <div>
-              <div style={{ fontSize: 11, color: "var(--fg-3)" }}>预警事件</div>
-              <div className="num" style={{ fontSize: 18, fontWeight: 600, marginTop: 2, color: "var(--red)" }}>2<span className="muted" style={{ fontSize: 12, marginLeft: 2 }}>高等级</span></div>
-            </div>
-          </div>
         </div>
       </div>
 
@@ -74,30 +68,30 @@ function PageProductPool({ onNav, openDrawer, compareIds, addToCompare }) {
           <div className="card-header">
             <div>
               <div className="card-title"><span className="bar" />产品筛选</div>
-              <div className="card-sub">按分类或特色系列筛选产品池</div>
+              <div className="card-sub"></div>
             </div>
-            {(featFilter || catId !== "agg") && (
-              <button className="btn-link" onClick={() => { setCatId("agg"); setFeatFilter(null); }}>重置</button>
-            )}
+            {(featFilter || catId !== "agg") &&
+            <button className="btn-link" onClick={() => {setCatId("agg");setFeatFilter(null);}}>重置</button>
+            }
           </div>
           <div className="card-body" style={{ padding: 0 }}>
             {/* Sub-module: 产品分类 */}
             <div style={{ padding: "12px 18px" }}>
               <div style={{
                 display: "flex", alignItems: "center", justifyContent: "space-between",
-                marginBottom: 10,
+                marginBottom: 10
               }}>
                 <div style={{ fontSize: 12, fontWeight: 600, color: "var(--fg-2)", display: "flex", alignItems: "center", gap: 6 }}>
                   <span style={{ width: 4, height: 4, borderRadius: 2, background: "var(--primary)" }} />
                   产品分类
-                  <span className="muted" style={{ fontWeight: 400, fontSize: 11 }}>按风险偏好分组</span>
+                  <span className="muted" style={{ fontWeight: 400, fontSize: 11 }}></span>
                 </div>
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10 }}>
-                {catCounts.map((c) => (
-                  <div key={c.id}
-                       className={"cat-card " + (catId === c.id ? "active" : "")}
-                       onClick={() => setCatId(c.id)}>
+                {catCounts.map((c) =>
+                <div key={c.id}
+                className={"cat-card " + (catId === c.id ? "active" : "")}
+                onClick={() => setCatId(c.id)}>
                     <div className="cat-card-head">
                       <span className="tag" style={{ background: c.soft, color: c.color }}>{c.name}</span>
                     </div>
@@ -106,7 +100,7 @@ function PageProductPool({ onNav, openDrawer, compareIds, addToCompare }) {
                       {c.delta > 0 ? "▲" : c.delta < 0 ? "▼" : "—"} {Math.abs(c.delta)}
                     </div>
                   </div>
-                ))}
+                )}
               </div>
             </div>
 
@@ -117,27 +111,27 @@ function PageProductPool({ onNav, openDrawer, compareIds, addToCompare }) {
             <div style={{ padding: "12px 18px 16px" }}>
               <div style={{
                 display: "flex", alignItems: "center", justifyContent: "space-between",
-                marginBottom: 10,
+                marginBottom: 10
               }}>
                 <div style={{ fontSize: 12, fontWeight: 600, color: "var(--fg-2)", display: "flex", alignItems: "center", gap: 6 }}>
                   <span style={{ width: 4, height: 4, borderRadius: 2, background: "var(--purple)" }} />
                   特色产品
                   <span className="muted" style={{ fontWeight: 400, fontSize: 11 }}>系列产品矩阵</span>
                 </div>
-                {featFilter && (
-                  <button className="btn-link" onClick={() => setFeatFilter(null)}>清除筛选</button>
-                )}
+                {featFilter &&
+                <button className="btn-link" onClick={() => setFeatFilter(null)}>清除筛选</button>
+                }
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10 }}>
-                {FEATURED.map((f) => (
-                  <div key={f.id}
-                       className="feat-card"
-                       onClick={() => setFeatFilter(featFilter === f.id ? null : f.id)}
-                       style={{
-                         "--accent": f.color, "--accent-soft": f.soft,
-                         borderColor: featFilter === f.id ? f.color : "",
-                         boxShadow: featFilter === f.id ? `0 0 0 1px ${f.color}` : ""
-                       }}>
+                {FEATURED.map((f) =>
+                <div key={f.id}
+                className="feat-card"
+                onClick={() => setFeatFilter(featFilter === f.id ? null : f.id)}
+                style={{
+                  "--accent": f.color, "--accent-soft": f.soft,
+                  borderColor: featFilter === f.id ? f.color : "",
+                  boxShadow: featFilter === f.id ? `0 0 0 1px ${f.color}` : ""
+                }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8 }}>
                       <div>
                         <span className="feat-card-pill" style={{ background: f.soft, color: f.color }}>特色系列</span>
@@ -153,7 +147,7 @@ function PageProductPool({ onNav, openDrawer, compareIds, addToCompare }) {
                       </div>
                     </div>
                   </div>
-                ))}
+                )}
               </div>
             </div>
           </div>
@@ -163,11 +157,8 @@ function PageProductPool({ onNav, openDrawer, compareIds, addToCompare }) {
         <div className="card">
           <div className="card-header">
             <div>
-              <div className="card-title">
-                <span className="bar" style={{ background: currentCat.color }} />
-                产品指标 · {currentCat.name}
-              </div>
-              <div className="card-sub">基于当前分类 {scoped.length} 只产品的均值</div>
+              <div className="card-title"><span className="bar" />产品指标</div>
+              <div className="card-sub"></div>
             </div>
           </div>
           <div className="card-body grid grid-2" style={{ gap: 10 }}>
@@ -211,12 +202,12 @@ function PageProductPool({ onNav, openDrawer, compareIds, addToCompare }) {
       {/* Product list */}
       <div className="filter-bar">
         <span className="filter-label">分类：</span>
-        {CATEGORIES.map((c) => (
-          <span key={c.id} className={"chip " + (c.id === catId ? "active" : "")} onClick={() => setCatId(c.id)}>
+        {CATEGORIES.map((c) =>
+        <span key={c.id} className={"chip " + (c.id === catId ? "active" : "")} onClick={() => setCatId(c.id)}>
             {c.name}
             <span className="count">{products.filter((p) => p.catId === c.id).length}</span>
           </span>
-        ))}
+        )}
         <span style={{ width: 1, height: 16, background: "var(--border)", margin: "0 4px" }} />
         <span className="filter-label">管理人：</span>
         <select className="select" value={mgrFilter} onChange={(e) => setMgrFilter(e.target.value)}>
@@ -230,17 +221,17 @@ function PageProductPool({ onNav, openDrawer, compareIds, addToCompare }) {
       </div>
 
       <div className="tbl-wrap">
-        <table className="tbl">
+        <table className="tbl zebra">
           <thead>
             <tr>
               <th style={{ width: 36 }}></th>
               <th>产品</th>
-              <th>分类</th>
-              <th>管理人</th>
-              <th className="num-col">年化收益</th>
-              <th className="num-col">最大回撤</th>
-              <th className="num-col">夏普</th>
-              <th style={{ width: 120 }}>操作</th>
+              <th className="col-tag">分类</th>
+              <th className="col-mgr">管理人</th>
+              <th className="col-num">年化收益</th>
+              <th className="col-num">最大回撤</th>
+              <th className="col-num">夏普</th>
+              <th className="col-action">操作</th>
             </tr>
           </thead>
           <tbody>
@@ -259,31 +250,31 @@ function PageProductPool({ onNav, openDrawer, compareIds, addToCompare }) {
                       <span className="prod-code">{p.code} · 评级 {p.rating}</span>
                     </div>
                   </td>
-                  <td><span className="tag" style={{ background: cat.soft, color: cat.color }}>{cat.name}</span></td>
-                  <td>{p.manager}</td>
-                  <td className="num-col" style={{ color: p.annualReturn >= 0 ? "var(--red)" : "var(--green)" }}>
+                  <td className="col-tag"><span className="tag" style={{ background: cat.soft, color: cat.color }}>{cat.name}</span></td>
+                  <td className="col-mgr">{p.manager}</td>
+                  <td className="col-num" style={{ color: p.annualReturn >= 0 ? "var(--red)" : "var(--green)" }}>
                     {(p.annualReturn * 100).toFixed(2)}%
                   </td>
-                  <td className="num-col danger">{(p.maxDrawdown * 100).toFixed(2)}%</td>
-                  <td className="num-col">{p.sharpe.toFixed(2)}</td>
-                  <td>
+                  <td className="col-num" style={{ color: "var(--red)" }}>{(p.maxDrawdown * 100).toFixed(2)}%</td>
+                  <td className="col-num">{p.sharpe.toFixed(2)}</td>
+                  <td className="col-action">
                     <button className="btn sm" onClick={() => openDrawer({ kind: "product", id: p.id })}>详情</button>
-                    {!inCmp && (
-                      <button className="btn sm" style={{ marginLeft: 4 }} onClick={() => { addToCompare(p.id); toast.push(`已加入对比：${p.name}`); }}>加入对比</button>
-                    )}
+                    {!inCmp &&
+                    <button className="btn sm" style={{ marginLeft: 4 }} onClick={() => {addToCompare(p.id);toast.push(`已加入对比：${p.name}`);}}>加入对比</button>
+                    }
                     {inCmp && <span className="tag green" style={{ marginLeft: 4 }}>已在对比</span>}
                   </td>
-                </tr>
-              );
+                </tr>);
+
             })}
-            {filtered.length === 0 && (
-              <tr><td colSpan="8"><div className="empty"><div className="icon">{Icons.empty}</div>当前筛选下无产品</div></td></tr>
-            )}
+            {filtered.length === 0 &&
+            <tr><td colSpan="8"><div className="empty"><div className="icon">{Icons.empty}</div>当前筛选下无产品</div></td></tr>
+            }
           </tbody>
         </table>
       </div>
-    </React.Fragment>
-  );
+    </React.Fragment>);
+
 }
 
 Object.assign(window, { PageProductPool });

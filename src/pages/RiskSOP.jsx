@@ -88,15 +88,15 @@ function PageRiskWarning({ openDrawer, onNav, watchState, setStage }) {
           </div>
         </div>
         <div className="tbl-wrap" style={{ border: "none", borderRadius: 0 }}>
-          <table className="tbl">
+          <table className="tbl zebra">
             <thead>
               <tr>
                 <th>产品 / 对象</th>
-                <th>大类</th>
-                <th>场景</th>
-                <th>驱动</th>
-                <th>标签</th>
-                <th>等级</th>
+                <th className="col-tag">大类</th>
+                <th className="col-scene">场景</th>
+                <th className="col-driver">驱动</th>
+                <th className="col-tag">标签</th>
+                <th className="col-level">等级</th>
                 <th>触发原因</th>
               </tr>
             </thead>
@@ -112,19 +112,16 @@ function PageRiskWarning({ openDrawer, onNav, watchState, setStage }) {
                         <span className="prod-code">{p?.code}</span>
                       </div>
                     </td>
-                    <td>{cat && <span className="tag" style={{ background: cat.soft, color: cat.color }}>{cat.name}</span>}</td>
-                    <td style={{ fontSize: 12 }}>{e.scene}</td>
-                    <td><span className={"tag " + (e.driver.includes("投研") ? "purple" : "blue")}>{e.driver}</span></td>
-                    <td><span className={"tag " + TAG_CLASS[e.tag]}>{e.tag}</span></td>
-                    <td>
-                      <span style={{
-                        display: "inline-block", padding: "2px 8px", borderRadius: 3,
-                        fontSize: 11, fontWeight: 600,
-                        background: e.level === "high" ? "var(--red)" : e.level === "mid" ? "var(--orange)" : "var(--yellow)",
-                        color: "#fff"
+                    <td className="col-tag">{cat && <span className="tag" style={{ background: cat.soft, color: cat.color }}>{cat.name}</span>}</td>
+                    <td className="col-scene" style={{ fontSize: 12 }}>{e.scene}</td>
+                    <td className="col-driver"><span className={"tag " + (e.driver.includes("投研") ? "purple" : "blue")}>{e.driver}</span></td>
+                    <td className="col-tag"><span className={"tag " + TAG_CLASS[e.tag]}>{e.tag}</span></td>
+                    <td className="col-level">
+                      <span className="level-pill" style={{
+                        background: e.level === "high" ? "var(--red)" : e.level === "mid" ? "var(--orange)" : "var(--yellow)"
                       }}>{LEVELS[e.level]}</span>
                     </td>
-                    <td style={{ fontSize: 12, color: "var(--fg-2)", maxWidth: 240 }}>{e.reason}</td>
+                    <td className="col-text"><span className="clamp-2">{e.reason}</span></td>
                   </tr>);
 
               })}
@@ -376,15 +373,15 @@ function PageWarnOverview({ onNav, watchState, setStage }) {
           <span className="muted txt-sm">高等级或处于待确认/待触达阶段的事件 · 共 {urgent.length} 条</span>
         </div>
         <div className="tbl-wrap" style={{ border: "none", borderRadius: 0 }}>
-          <table className="tbl">
+          <table className="tbl zebra">
             <thead>
               <tr>
                 <th>产品 / 对象</th>
-                <th>大类</th>
-                <th>场景</th>
-                <th>驱动</th>
-                <th>标签</th>
-                <th>等级</th>
+                <th className="col-tag">大类</th>
+                <th className="col-scene">场景</th>
+                <th className="col-driver">驱动</th>
+                <th className="col-tag">标签</th>
+                <th className="col-level">等级</th>
                 <th>触发原因</th>
                 <th style={{ width: 260 }}>状态 / 推进</th>
               </tr>
@@ -401,19 +398,16 @@ function PageWarnOverview({ onNav, watchState, setStage }) {
                         <span className="prod-code">{p?.code}</span>
                       </div>
                     </td>
-                    <td>{cat && <span className="tag" style={{ background: cat.soft, color: cat.color }}>{cat.name}</span>}</td>
-                    <td style={{ fontSize: 12 }}>{e.scene}</td>
-                    <td><span className={"tag " + (e.driver.includes("投研") ? "purple" : "blue")}>{e.driver}</span></td>
-                    <td><span className={"tag " + TAG_CLASS[e.tag]}>{e.tag}</span></td>
-                    <td>
-                      <span style={{
-                        display: "inline-block", padding: "2px 8px", borderRadius: 3,
-                        fontSize: 11, fontWeight: 600,
+                    <td className="col-tag">{cat && <span className="tag" style={{ background: cat.soft, color: cat.color }}>{cat.name}</span>}</td>
+                    <td className="col-scene" style={{ fontSize: 12 }}>{e.scene}</td>
+                    <td className="col-driver"><span className={"tag " + (e.driver.includes("投研") ? "purple" : "blue")}>{e.driver}</span></td>
+                    <td className="col-tag"><span className={"tag " + TAG_CLASS[e.tag]}>{e.tag}</span></td>
+                    <td className="col-level">
+                      <span className="level-pill" style={{
                         background: e.level === "high" ? "var(--red)" : e.level === "mid" ? "var(--orange)" : "var(--yellow)",
-                        color: "#fff",
                       }}>{LEVELS[e.level]}</span>
                     </td>
-                    <td style={{ fontSize: 12, color: "var(--fg-2)", maxWidth: 240 }}>{e.reason}</td>
+                    <td className="col-text"><span className="clamp-2">{e.reason}</span></td>
                     <td>
                       <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
                         <div className="pipeline" style={{ flex: 1 }}>
@@ -470,15 +464,15 @@ function PageWarnOverview({ onNav, watchState, setStage }) {
           </div>
         </div>
         <div className="tbl-wrap" style={{ border: "none", borderRadius: 0 }}>
-          <table className="tbl">
+          <table className="tbl zebra">
             <thead>
               <tr>
                 <th>产品 / 对象</th>
-                <th>大类</th>
-                <th>场景</th>
-                <th>驱动</th>
-                <th>标签</th>
-                <th>等级</th>
+                <th className="col-tag">大类</th>
+                <th className="col-scene">场景</th>
+                <th className="col-driver">驱动</th>
+                <th className="col-tag">标签</th>
+                <th className="col-level">等级</th>
                 <th>触发原因</th>
               </tr>
             </thead>
@@ -494,19 +488,16 @@ function PageWarnOverview({ onNav, watchState, setStage }) {
                         <span className="prod-code">{p?.code}</span>
                       </div>
                     </td>
-                    <td>{cat && <span className="tag" style={{ background: cat.soft, color: cat.color }}>{cat.name}</span>}</td>
-                    <td style={{ fontSize: 12 }}>{e.scene}</td>
-                    <td><span className={"tag " + (e.driver.includes("投研") ? "purple" : "blue")}>{e.driver}</span></td>
-                    <td><span className={"tag " + TAG_CLASS[e.tag]}>{e.tag}</span></td>
-                    <td>
-                      <span style={{
-                        display: "inline-block", padding: "2px 8px", borderRadius: 3,
-                        fontSize: 11, fontWeight: 600,
+                    <td className="col-tag">{cat && <span className="tag" style={{ background: cat.soft, color: cat.color }}>{cat.name}</span>}</td>
+                    <td className="col-scene" style={{ fontSize: 12 }}>{e.scene}</td>
+                    <td className="col-driver"><span className={"tag " + (e.driver.includes("投研") ? "purple" : "blue")}>{e.driver}</span></td>
+                    <td className="col-tag"><span className={"tag " + TAG_CLASS[e.tag]}>{e.tag}</span></td>
+                    <td className="col-level">
+                      <span className="level-pill" style={{
                         background: e.level === "high" ? "var(--red)" : e.level === "mid" ? "var(--orange)" : "var(--yellow)",
-                        color: "#fff",
                       }}>{LEVELS[e.level]}</span>
                     </td>
-                    <td style={{ fontSize: 12, color: "var(--fg-2)", maxWidth: 320 }}>{e.reason}</td>
+                    <td className="col-text"><span className="clamp-2">{e.reason}</span></td>
                   </tr>
                 );
               })}

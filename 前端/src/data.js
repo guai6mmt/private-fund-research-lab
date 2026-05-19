@@ -352,7 +352,8 @@
     ]},
   ];
 
-  window.IRDATA = {
+  const root = typeof window !== "undefined" ? window : globalThis;
+  root.IRDATA = {
     DATES,
     DAYS,
     CATEGORIES,
@@ -365,5 +366,23 @@
     escape,
     validate,
   };
+
+  // Compatibility for the legacy Node-based metric tests and older static app helpers.
+  // The React frontend reads IRDATA; these globals keep existing utility tests useful.
+  root.products = products.map((p) => ({
+    ...p,
+    labels: DATES,
+    allocation: {
+      dates: Array.from({ length: p.allocation[0].series.length }, (_, i) => `M${i + 1}`),
+      series: p.allocation.map((s) => ({ name: s.name, values: s.series })),
+    },
+  }));
+  root.managers = managers;
+  root.focusEvents = watchlist;
+  root.indicatorGroups = [];
+  root.sopMetrics = [];
+  root.tacticalDiagnostics = [];
+  root.strategyCenterDiagnostics = [];
+  root.marketStateTags = [];
   validate();
 })();

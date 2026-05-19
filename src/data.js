@@ -1,776 +1,388 @@
-const state = {
-  page: "product-detail",
-  selectedProductId: "B5",
-  selectedManagerId: "M3",
-  compareProductIds: ["B5", "C3"],
-  poolTypeFilter: "积极看多",
-  poolManagerFilter: "全部",
-  poolSelectedIds: ["B5", "C3"],
-  activeLibrary: "业绩",
-  searchOpen: false,
-};
+/* === Sample data for 投研 product evaluation system === */
+(function () {
+  // Deterministic pseudo-random
+  function rng(seed) {
+    let s = seed;
+    return function () {
+      s = (s * 9301 + 49297) % 233280;
+      return s / 233280;
+    };
+  }
 
-let products = [
-  {
-    id: "A",
-    name: "产品A",
-    code: "FOF-A001",
-    managerId: "M1",
-    manager: "管理人甲",
-    type: "多策略FOF",
-    rating: "优秀",
-    score: 92,
-    nav: "1.84",
-    maxDrawdown: 12.35,
-    currentDrawdown: 4.28,
-    recoveryDays: 58,
-    vol: 10.21,
-    calmar: 1.48,
-    annualReturn: 16.8,
-    sharpe: 1.52,
-    conclusion:
-      "本产品近一年业绩表现较强，超额收益稳定，最大回撤相对较低，风险收益比较好，综合评估结果优秀，建议继续重点推荐。",
-    risk:
-      "近期权益类策略占比有所提升，现金缓冲水平下降；若市场波动加剧，回撤可能扩大，需持续跟踪其风险控制能力。",
-    navSeries: [0.95, 1.02, 1.07, 1.12, 1.19, 1.16, 1.23, 1.49, 1.43, 1.47, 1.52, 1.50, 1.58, 1.62, 1.59, 1.61, 1.64, 1.70, 1.76, 1.84],
-    benchmarkSeries: [0.96, 1.0, 1.02, 1.04, 1.02, 1.05, 1.04, 1.22, 1.18, 1.21, 1.27, 1.25, 1.32, 1.35, 1.32, 1.33, 1.31, 1.36, 1.39, 1.44],
-    peerSeries: [0.94, 0.93, 0.92, 0.95, 0.93, 0.91, 0.92, 1.01, 0.99, 1.04, 1.06, 1.03, 1.09, 1.10, 1.08, 1.06, 1.05, 1.10, 1.13, 1.15],
-    drawdown: [0, -0.2, -1.1, -0.8, -2.6, -0.4, -1.2, -0.6, -4.8, -9.2, -1.8, -2.6, -0.5, -1.1, -0.8, -2.2, -3.6, -2.8, -6.8, -2.1],
-    allocation: {
-      dates: ["2024-05", "2024-08", "2024-11", "2025-02", "2025-05"],
-      series: [
-        { name: "权益多头", color: "#0f5cff", values: [22, 24, 18, 24, 28] },
-        { name: "债券策略", color: "#00a99d", values: [31, 34, 39, 33, 27] },
-        { name: "量化对冲", color: "#ff9f1a", values: [25, 20, 18, 22, 19] },
-        { name: "其他策略", color: "#6b4ce6", values: [22, 22, 25, 21, 26] },
-      ],
-    },
-    cashSeries: [11, 12, 9, 10, 11, 16, 18, 21, 17, 14, 11, 9, 8, 10],
-    quality: {
-      positiveWeeks: "64%",
-      alphaStability: "高",
-      downsideCapture: "0.71",
-      comment: "上涨周参与度较高，下跌周损失控制优于同类，收益质量维持在优秀区间。",
-    },
-    events: [
-      "2025-01 权益多头占比提升 4.2pct",
-      "2025-03 现金仓位降至 12.3%",
-      "2025-05 回撤修复速度优于同类中位数",
-    ],
-  },
-  {
-    id: "B",
-    name: "产品B",
-    code: "FOF-B017",
-    managerId: "M1",
-    manager: "管理人甲",
-    type: "稳健配置FOF",
-    rating: "良好",
-    score: 84,
-    nav: "1.39",
-    maxDrawdown: 9.88,
-    currentDrawdown: 3.16,
-    recoveryDays: 44,
-    vol: 8.74,
-    calmar: 1.32,
-    annualReturn: 11.5,
-    sharpe: 1.28,
-    conclusion: "本产品波动较低，收益稳定性较好，适合稳健型客户配置。",
-    risk: "短期超额收益收窄，债券策略贡献下降，需要观察组合弹性。",
-    navSeries: [0.98, 1.01, 1.04, 1.06, 1.07, 1.1, 1.12, 1.16, 1.18, 1.2, 1.24, 1.25, 1.29, 1.31, 1.3, 1.33, 1.35, 1.36, 1.38, 1.39],
-    benchmarkSeries: [0.96, 1, 1.02, 1.04, 1.02, 1.05, 1.04, 1.12, 1.16, 1.17, 1.21, 1.2, 1.23, 1.28, 1.27, 1.29, 1.31, 1.32, 1.33, 1.35],
-    peerSeries: [0.95, 0.97, 0.99, 1, 1.02, 1.01, 1.04, 1.07, 1.09, 1.08, 1.11, 1.12, 1.14, 1.16, 1.15, 1.18, 1.19, 1.2, 1.21, 1.23],
-    drawdown: [0, -0.5, -1.5, -1.1, -2.1, -0.7, -1.3, -2.2, -3.4, -1.6, -1.1, -0.9, -2.4, -3.1, -1.8, -0.8, -2.5, -3.4, -2.1, -3.16],
-    allocation: {
-      dates: ["2024-05", "2024-08", "2024-11", "2025-02", "2025-05"],
-      series: [
-        { name: "权益多头", color: "#0f5cff", values: [16, 15, 18, 17, 18] },
-        { name: "债券策略", color: "#00a99d", values: [46, 48, 44, 43, 42] },
-        { name: "量化对冲", color: "#ff9f1a", values: [18, 17, 19, 21, 20] },
-        { name: "其他策略", color: "#6b4ce6", values: [20, 20, 19, 19, 20] },
-      ],
-    },
-    cashSeries: [17, 18, 17, 16, 15, 16, 17, 16, 15, 15, 14, 13, 13, 14],
-    quality: {
-      positiveWeeks: "59%",
-      alphaStability: "中高",
-      downsideCapture: "0.78",
-      comment: "收益来源较均衡，但进攻弹性弱于产品A。",
-    },
-    events: ["2025-02 债券策略贡献回落", "2025-04 组合波动率维持低位"],
-  },
-  {
-    id: "C",
-    name: "产品C",
-    code: "FOF-C083",
-    managerId: "M2",
-    manager: "管理人乙",
-    type: "进取多策略",
-    rating: "观察",
-    score: 76,
-    nav: "1.57",
-    maxDrawdown: 18.67,
-    currentDrawdown: 7.8,
-    recoveryDays: 91,
-    vol: 14.72,
-    calmar: 0.94,
-    annualReturn: 13.9,
-    sharpe: 0.92,
-    conclusion: "本产品收益弹性较强，但回撤修复时间偏长，建议降低推荐优先级。",
-    risk: "组合权益暴露较高，市场急跌时回撤放大明显，需关注风险漂移。",
-    navSeries: [0.94, 1.01, 1.09, 1.2, 1.15, 1.25, 1.33, 1.28, 1.42, 1.5, 1.43, 1.56, 1.49, 1.6, 1.52, 1.48, 1.55, 1.51, 1.6, 1.57],
-    benchmarkSeries: [0.96, 1, 1.02, 1.04, 1.02, 1.05, 1.04, 1.22, 1.18, 1.21, 1.27, 1.25, 1.32, 1.35, 1.32, 1.33, 1.31, 1.36, 1.39, 1.44],
-    peerSeries: [0.94, 0.93, 0.92, 0.95, 0.93, 0.91, 0.92, 1.01, 0.99, 1.04, 1.06, 1.03, 1.09, 1.1, 1.08, 1.06, 1.05, 1.1, 1.13, 1.15],
-    drawdown: [0, -1.2, -3.5, -2.1, -6.8, -1.5, -4.2, -8.1, -2.5, -5.3, -10.1, -4.4, -8.8, -3.1, -11.6, -18.67, -12.8, -9.2, -7.4, -7.8],
-    allocation: {
-      dates: ["2024-05", "2024-08", "2024-11", "2025-02", "2025-05"],
-      series: [
-        { name: "权益多头", color: "#0f5cff", values: [34, 38, 42, 44, 46] },
-        { name: "债券策略", color: "#00a99d", values: [20, 18, 16, 15, 14] },
-        { name: "量化对冲", color: "#ff9f1a", values: [24, 22, 23, 21, 19] },
-        { name: "其他策略", color: "#6b4ce6", values: [22, 22, 19, 20, 21] },
-      ],
-    },
-    cashSeries: [9, 8, 7, 7, 6, 5, 6, 5, 4, 6, 7, 8, 7, 6],
-    quality: {
-      positiveWeeks: "55%",
-      alphaStability: "中",
-      downsideCapture: "1.08",
-      comment: "收益由高弹性阶段贡献较多，下行捕获率偏高。",
-    },
-    events: ["2025-01 权益暴露突破 40%", "2025-03 最大回撤触及预警阈值"],
-  },
-];
+  function dateRange(startStr, days) {
+    const out = [];
+    const d = new Date(startStr);
+    for (let i = 0; i < days; i++) {
+      out.push(new Date(d.getTime() + i * 86400000).toISOString().slice(0, 10));
+    }
+    return out;
+  }
 
-products = [
-  {
-    id: "A108",
-    name: "A108",
-    code: "108产品示例",
-    sourceFile: "108产品示例.xlsx",
-    managerId: "M1",
-    manager: "管理人甲",
-    type: "多策略FOF",
-    rating: "稳健",
-    score: 86,
-    nav: "1.0917",
-    latestDate: "2026-04-17",
-    maxDrawdown: 2.54,
-    peerMaxDrawdown: 4.8,
-    currentDrawdown: 0.4,
-    recoveryDays: 14,
-    vol: 4.46,
-    calmar: 4.52,
-    annualReturn: 11.47,
-    sharpe: 2.24,
-    conclusion: "A108 基于周度数据表现稳健，成立以来年化收益约 11.47%，最大回撤约 2.54%，风险收益比相对突出。",
-    risk: "短期最大回撤仍处在可控区间，但产品样本时间较短，后续需要继续观察回撤修复和策略权重漂移。",
-    labels: ["2026-01-23", "2026-01-30", "2026-02-06", "2026-02-27", "2026-03-06", "2026-03-13", "2026-03-20", "2026-03-27", "2026-04-03", "2026-04-10", "2026-04-17"],
-    navSeries: [1.0852, 1.0834, 1.0756, 1.0961, 1.0888, 1.0864, 1.0707, 1.0721, 1.0683, 1.0824, 1.0917],
-    benchmarkSeries: [1.0852, 1.084, 1.08, 1.086, 1.083, 1.081, 1.076, 1.078, 1.074, 1.081, 1.086],
-    peerSeries: [1.0852, 1.082, 1.079, 1.083, 1.08, 1.078, 1.073, 1.074, 1.071, 1.076, 1.08],
-    drawdown: [0, -0.17, -0.88, 0, -0.67, -0.88, -2.32, -2.19, -2.54, -1.25, -0.4],
-    allocation: {
-      dates: ["01-23", "01-30", "02-06", "02-27", "03-06", "03-13", "03-20", "03-27", "04-03", "04-10", "04-17"],
-      series: [
-        { name: "固定收益", color: "#3f7cff", values: [14.93, 14.97, 15.09, 14.84, 14.96, 15, 15.23, 15.22, 15.29, 15.11, 15] },
-        { name: "量化套利", color: "#00a99d", values: [24.41, 24.44, 24.64, 24.35, 24.58, 24.62, 24.93, 24.94, 25.05, 24.77, 24.62] },
-        { name: "量化中性", color: "#ff9f1a", values: [20.99, 20.96, 21.22, 21.14, 21.41, 21.49, 21.68, 21.82, 21.88, 21.72, 21.64] },
-        { name: "CTA", color: "#6b4ce6", values: [20.88, 21.3, 20.87, 20.84, 20.7, 20.7, 20.65, 20.5, 20.62, 20.44, 20.3] },
-        { name: "量化指增", color: "#e15c3b", values: [17.41, 16.96, 16.81, 17.53, 17.07, 16.92, 16.22, 16.24, 15.9, 16.73, 17.25] },
-        { name: "现金及货币", color: "#90a4bc", values: [1.41, 1.42, 1.43, 1.33, 1.34, 1.35, 1.31, 1.3, 1.31, 1.29, 1.22] },
-      ],
-    },
-    cashSeries: [1.41, 1.42, 1.43, 1.33, 1.34, 1.35, 1.31, 1.3, 1.31, 1.29, 1.22],
-    strategyMetrics: [
-      ["策略集中度（HHI）", "0.20"],
-      ["现金缓冲度", "1.22%"],
-      ["策略配置信度", "0.91"],
-    ],
-    quality: null,
-    events: ["策略行为来自 108产品示例.xlsx", "收益质量模块按要求暂不填充"],
-  },
-  {
-    id: "B5",
-    name: "B5",
-    code: "华润信托·民银尊享B5号单一资金信托",
-    sourceFile: "B5净值+策略配置时序",
-    managerId: "M3",
-    manager: "华润信托",
-    type: "单一资金信托",
-    rating: "稳健",
-    score: 82,
-    nav: "1.2202",
-    latestDate: "2026-04-30",
-    maxDrawdown: 6.19,
-    peerMaxDrawdown: 9.2,
-    currentDrawdown: 0,
-    recoveryDays: 246,
-    vol: 4.5,
-    calmar: 1.13,
-    annualReturn: 7.02,
-    sharpe: 1.44,
-    conclusion: "B5基于净值与策略配置时序数据表现稳健，最新净值1.2202，年化收益约7.02%，最大回撤约6.19%，策略配置以市场中性、指数增强、量化多头为主。",
-    risk: "B5历史回撤修复周期较长，策略层面从现金迁移至多策略配置后，需继续观察套利、市场中性和指数增强之间的权重再平衡。",
-    labels: ["2023-05-26", "2023-07-28", "2023-09-15", "2023-11-17", "2024-01-05", "2024-03-01", "2024-04-26", "2024-06-28", "2024-08-16", "2024-10-18", "2024-12-06", "2025-01-27", "2025-03-28", "2025-05-23", "2025-07-11", "2025-09-05", "2025-10-31", "2025-12-31", "2026-03-06", "2026-04-30"],
-    navSeries: [1, 1.008, 1.0083, 1.0146, 1.0055, 0.9745, 0.9916, 0.996, 0.9973, 1.0162, 1.0456, 1.0423, 1.0653, 1.0714, 1.0893, 1.1248, 1.1471, 1.1636, 1.2086, 1.2202],
-    benchmarkSeries: [1, 1.0175, 0.9901, 0.9775, 0.953, 0.9789, 0.9863, 0.9749, 0.9635, 1.0321, 1.0393, 1.0247, 1.0373, 1.0362, 1.0517, 1.0991, 1.1187, 1.1199, 1.125, 1.1413],
-    peerSeries: [1, 1.0142, 1, 0.9962, 0.9784, 0.9781, 0.989, 0.9837, 0.9772, 1.023, 1.0402, 1.0312, 1.0493, 1.0525, 1.0699, 1.1125, 1.1335, 1.1412, 1.1634, 1.1767],
-    drawdown: [0, 0, 0, 0, -0.9, -3.95, -2.27, -1.83, -1.71, 0, 0, -0.32, 0, 0, 0, 0, 0, 0, 0, 0],
-    allocation: {
-      dates: ["2023-05", "2023-09", "2023-12", "2024-04", "2024-07", "2024-10", "2025-01", "2025-04", "2025-07", "2025-10", "2026-01", "2026-04"],
-      series: [
-        { name: "市场中性", color: "#00a99d", values: [0, 35.18, 41.6, 17.31, 15.89, 22.37, 22.84, 17.08, 17.86, 18.91, 21.22, 21.31] },
-        { name: "指数增强", color: "#3f7cff", values: [0, 16.83, 16.69, 11, 5.1, 5.45, 10.65, 14.68, 15.54, 17.87, 17.51, 19.85] },
-        { name: "量化多头", color: "#e15c3b", values: [0, 0, 0, 0, 0, 0, 0, 0, 8.8, 10.88, 12.53, 12.68] },
-        { name: "套利", color: "#ff9f1a", values: [0, 10.09, 0, 20.29, 30.54, 28.22, 39.33, 35.41, 30.86, 25.49, 16.4, 9.16] },
-        { name: "CTA", color: "#6b4ce6", values: [0, 9.95, 10.09, 0, 5.06, 6.33, 7.78, 9.61, 9.62, 9.12, 9.02, 9.11] },
-        { name: "现金", color: "#90a4bc", values: [100, 2.72, 3.87, 12.44, 0.82, 14.08, 1.12, 8.14, 6.33, 1.04, 2.57, 8.04] },
-      ],
-    },
-    cashSeries: [100, 2.72, 3.87, 12.44, 0.82, 14.08, 1.12, 8.14, 6.33, 1.04, 2.57, 8.04],
-    strategyMetrics: [
-      ["单期最大调仓", "53.94%"],
-      ["累计调仓幅度", "550.92%"],
-      ["调仓胜率", "62.3%"],
-    ],
-    quality: null,
-    events: ["业绩表现来自2026年04月30日产品净值表", "策略行为来自B5策略配置时序图"],
-  },
-  {
-    id: "C3",
-    name: "C3",
-    code: "华润信托·民银尊享C3号单一资金信托",
-    sourceFile: "C3净值+策略配置时序",
-    managerId: "M3",
-    manager: "华润信托",
-    type: "单一资金信托",
-    rating: "进取观察",
-    score: 74,
-    nav: "1.1965",
-    latestDate: "2026-05-08",
-    maxDrawdown: 17.25,
-    peerMaxDrawdown: 18.8,
-    currentDrawdown: 0,
-    recoveryDays: 343,
-    vol: 10.07,
-    calmar: 0.36,
-    annualReturn: 6.18,
-    sharpe: 0.61,
-    conclusion: "C3最新净值1.1965，净值已修复并创新高，但历史最大回撤约17.25%，波动显著高于B5，策略配置更偏指数增强、主观选股和量化多头。",
-    risk: "C3权益相关策略暴露更高，2024年曾经历较深回撤；后续需要重点观察高权益暴露下的调仓纪律和回撤保护能力。",
-    labels: ["2023-05-12", "2023-07-14", "2023-09-01", "2023-11-03", "2023-12-29", "2024-02-23", "2024-04-19", "2024-06-21", "2024-08-09", "2024-10-11", "2024-12-06", "2025-01-27", "2025-03-28", "2025-05-23", "2025-07-18", "2025-09-05", "2025-11-07", "2026-01-09", "2026-03-13", "2026-05-08"],
-    navSeries: [1, 1.0073, 0.9912, 0.9803, 0.9813, 0.8737, 0.8867, 0.8758, 0.8501, 0.894, 0.9147, 0.8959, 0.9344, 0.9227, 0.964, 1.0208, 1.0566, 1.107, 1.1295, 1.1965],
-    benchmarkSeries: [1, 0.9902, 0.9629, 0.9102, 0.8713, 0.8862, 0.8994, 0.8877, 0.8461, 0.9872, 1.009, 0.9694, 0.9943, 0.9859, 1.0307, 1.1327, 1.1882, 1.2085, 1.1857, 1.2372],
-    peerSeries: [1, 0.9989, 0.9773, 0.9437, 0.9226, 0.8818, 0.894, 0.8816, 0.8464, 0.9433, 0.9646, 0.9349, 0.9668, 0.9579, 1.002, 1.0842, 1.131, 1.1644, 1.1612, 1.2187],
-    drawdown: [0, 0, -1.6, -2.68, -2.58, -13.26, -11.97, -13.05, -15.61, -11.25, -9.19, -11.06, -7.24, -8.4, -4.3, 0, 0, 0, 0, 0],
-    allocation: {
-      dates: ["2023-05", "2023-08", "2023-12", "2024-03", "2024-07", "2024-10", "2025-01", "2025-04", "2025-07", "2025-10", "2026-01", "2026-05"],
-      series: [
-        { name: "指数增强", color: "#3f7cff", values: [0, 38.81, 41.31, 33.98, 32.35, 23.43, 25.12, 35.98, 37.49, 40.77, 42.43, 43.42] },
-        { name: "主观选股", color: "#e15c3b", values: [0, 9.9, 9.99, 0, 10.69, 13.13, 15.19, 12.33, 12.22, 13.23, 22.53, 22.79] },
-        { name: "量化多头", color: "#ff9f1a", values: [0, 4.84, 10, 0, 0, 0, 0, 0, 0, 10.51, 13.12, 13.4] },
-        { name: "CTA", color: "#6b4ce6", values: [0, 10.16, 10.22, 11.32, 12.15, 16.25, 11.05, 12.68, 12.48, 11.43, 10.68, 10.57] },
-        { name: "多策略", color: "#00a99d", values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9.4, 8.81] },
-        { name: "现金", color: "#90a4bc", values: [100, 20.7, 13.11, 4.27, 13.51, 15.94, 2.8, 6.3, 5.8, 14.06, 1.83, 1] },
-      ],
-    },
-    cashSeries: [100, 20.7, 13.11, 4.27, 13.51, 15.94, 2.8, 6.3, 5.8, 14.06, 1.83, 1],
-    strategyMetrics: [
-      ["单期最大调仓", "41.34%"],
-      ["累计调仓幅度", "662.63%"],
-      ["调仓胜率", "48.3%"],
-    ],
-    quality: null,
-    events: ["业绩表现来自2026年05月08日产品净值表", "策略行为来自C3策略配置时序图"],
-  },
-];
+  function genNav(seed, days, opts) {
+    const r = rng(seed);
+    const { drift = 0.00035, vol = 0.011, shocks = [] } = opts || {};
+    const out = [1];
+    for (let i = 1; i < days; i++) {
+      let step = drift + (r() - 0.5) * vol * 2;
+      const shock = shocks.find((s) => s.day === i);
+      if (shock) step += shock.amt;
+      out.push(out[i - 1] * (1 + step));
+    }
+    return out;
+  }
 
-const managers = [
-  {
-    id: "M3",
-    name: "华润信托",
-    type: "信托计划管理人",
-    productCount: 2,
-    fundCount: 13,
-    conclusion: "当前已接入 B5、C3 两只单一资金信托的净值与策略配置时序，可初步评估管理人的策略配置和战术调仓能力。",
-    risk: "C3权益相关策略暴露较高且历史回撤较深；B5调仓后收益表现更稳定，需继续观察管理人在不同市场状态下的调仓一致性。",
-    capabilities: [
-      {
-        key: "strategy",
-        title: "一、策略配置能力",
-        score: 78,
-        level: "年初中枢回测",
-        text: "以年初定下的策略比率中枢为固定权重，不做年内调仓；用各策略对应市场指数加权，推演年底收益、回撤和夏普，再与实际产品结果对比判断战略配置能力。",
-        metrics: [
-          ["B5静态中枢", "收益7.4%"],
-          ["C3静态中枢", "收益8.1%"],
-          ["评价口径", "收益/回撤/夏普"],
-        ],
-      },
-      {
-        key: "tactical",
-        title: "二、战术配置能力",
-        score: 72,
-        level: "分化明显",
-        text: "B5调仓后收益检验更好，调仓胜率约62.3%；C3累计调仓幅度更高，但调仓后短期收益胜率约48.3%，择时稳定性仍需跟踪。",
-        metrics: [
-          ["B5调仓胜率", "62.3%"],
-          ["C3调仓胜率", "48.3%"],
-          ["环境匹配度", "样本分化"],
-        ],
-      },
-      {
-        key: "selection",
-        title: "三、选基能力",
-        score: 0,
-        level: "留白",
-        text: "选基能力部分暂不展示，待接入底层基金持仓、贡献和留存数据后再补充。",
-        metrics: [],
-      },
-    ],
-  },
-  {
-    id: "M1",
-    name: "管理人甲",
-    type: "多策略FOF",
-    productCount: 12,
-    fundCount: 38,
-    conclusion: "本管理人在三大核心能力方面表现稳健，整体风险可控。建议保持关注，持续跟踪能力稳定性与风格一致性。",
-    risk: "市场波动加剧时，战术配置能力存在阶段性回撤压力，需关注风格漂移与集中度风险。",
-    capabilities: [
-      {
-        key: "strategy",
-        title: "一、策略配置能力",
-        score: 88,
-        level: "稳健偏优",
-        text: "长期策略权重分配较稳定，权益、债券和量化对冲之间的结构切换有纪律。",
-        metrics: [
-          ["策略集中度 HHI", "0.58"],
-          ["有效策略数", "3.16"],
-          ["风格漂移", "低"],
-        ],
-      },
-      {
-        key: "tactical",
-        title: "二、战术配置能力",
-        score: 82,
-        level: "稳健",
-        text: "能在市场上行阶段提升权益暴露，但极端波动阶段回撤控制仍需观察。",
-        metrics: [
-          ["调仓胜率", "61%"],
-          ["平均换手", "6.5%"],
-          ["回撤后降仓速度", "中"],
-        ],
-      },
-      {
-        key: "selection",
-        title: "三、选基能力",
-        score: 86,
-        level: "优秀",
-        text: "底层基金贡献分布相对健康，头部贡献稳定，拖累基金占比可控。",
-        metrics: [
-          ["正贡献基金占比", "68%"],
-          ["基金留存率", "74%"],
-          ["尾部拖累", "可控"],
-        ],
-      },
-    ],
-  },
-  {
-    id: "M2",
-    name: "管理人乙",
-    type: "进取多策略",
-    productCount: 8,
-    fundCount: 29,
-    conclusion: "管理人乙具备较强进攻能力，但组合波动和风格漂移更明显。",
-    risk: "权益暴露提升较快，回撤修复能力弱于管理人甲。",
-    capabilities: [
-      {
-        key: "strategy",
-        title: "一、策略配置能力",
-        score: 76,
-        level: "观察",
-        text: "策略配置具备弹性，但集中度偏高，需要约束单一方向暴露。",
-        metrics: [
-          ["策略集中度 HHI", "0.71"],
-          ["有效策略数", "2.43"],
-          ["风格漂移", "中高"],
-        ],
-      },
-      {
-        key: "tactical",
-        title: "二、战术配置能力",
-        score: 73,
-        level: "观察",
-        text: "上行捕捉能力较好，但风险释放阶段降仓偏慢。",
-        metrics: [
-          ["调仓胜率", "52%"],
-          ["平均换手", "9.8%"],
-          ["回撤后降仓速度", "偏慢"],
-        ],
-      },
-      {
-        key: "selection",
-        title: "三、选基能力",
-        score: 79,
-        level: "良好",
-        text: "底层基金筛选能力尚可，但尾部拖累需要继续拆解。",
-        metrics: [
-          ["正贡献基金占比", "59%"],
-          ["基金留存率", "66%"],
-          ["尾部拖累", "偏高"],
-        ],
-      },
-    ],
-  },
-];
+  function drawdownSeries(nav) {
+    let peak = nav[0];
+    return nav.map((v) => {
+      peak = Math.max(peak, v);
+      return (v - peak) / peak;
+    });
+  }
 
-const simulatedProductSpecs = [
-  ["P001", "P001", "FOF-S001", "M1", "管理人甲", "稳健类FOF", "稳健", 88, 9.8, 3.8, 4.6, 2.18, 2.58, 34],
-  ["P002", "P002", "FOF-B002", "M1", "管理人甲", "多策略FOF", "良好", 83, 8.6, 5.2, 5.8, 1.54, 1.65, 48],
-  ["P003", "P003", "FOF-F003", "M1", "管理人甲", "固收增强FOF", "稳健", 90, 7.2, 2.6, 3.4, 2.08, 2.77, 28],
-  ["P004", "P004", "FOF-Q004", "M2", "管理人乙", "量化FOF", "观察", 76, 10.9, 8.8, 9.2, 1.02, 1.24, 63],
-  ["P005", "P005", "FOF-G005", "M2", "管理人乙", "进取类FOF", "进取观察", 72, 13.4, 15.6, 13.2, 0.82, 0.86, 86],
-  ["P006", "P006", "FOF-L006", "M1", "管理人甲", "稳健类FOF", "稳健", 87, 6.9, 3.1, 3.9, 1.92, 2.23, 30],
-  ["P007", "P007", "FOF-H007", "M2", "管理人乙", "多策略FOF", "良好", 81, 9.1, 6.4, 7.1, 1.28, 1.42, 54],
-  ["P008", "P008", "FOF-M008", "M3", "华润信托", "单一资金信托", "稳健", 80, 7.6, 6.8, 5.6, 1.31, 1.12, 57],
-  ["P009", "P009", "TRUST-D001", "M3", "华润信托", "单一资金信托", "良好", 79, 8.2, 7.4, 6.2, 1.21, 1.11, 61],
-  ["P010", "P010", "TRUST-E002", "M3", "华润信托", "单一资金信托", "观察", 73, 6.4, 10.9, 8.1, 0.72, 0.59, 74],
-  ["P011", "P011", "FOF-C011", "M2", "管理人乙", "量化FOF", "良好", 82, 8.9, 5.9, 7.8, 1.18, 1.51, 50],
-  ["P012", "P012", "FOF-A012", "M1", "管理人甲", "量化FOF", "稳健", 85, 7.8, 4.2, 4.7, 1.74, 1.86, 39],
-  ["P013", "P013", "FOF-W013", "M1", "管理人甲", "多策略FOF", "良好", 84, 8.4, 5.5, 5.1, 1.56, 1.53, 45],
-  ["P014", "P014", "FOF-E014", "M2", "管理人乙", "进取类FOF", "进取观察", 71, 14.2, 18.4, 14.6, 0.74, 0.77, 92],
-  ["P015", "P015", "FOF-CASH015", "M1", "管理人甲", "稳健类FOF", "稳健", 89, 5.6, 1.8, 2.2, 2.42, 3.11, 18],
-  ["P016", "P016", "FOF-N016", "M3", "华润信托", "量化FOF", "良好", 83, 7.1, 4.6, 4.9, 1.46, 1.54, 36],
-  ["P017", "P017", "FOF-X017", "M2", "管理人乙", "多策略FOF", "观察", 77, 9.7, 9.6, 8.4, 1.05, 1.01, 67],
-  ["P018", "P018", "FOF-R018", "M3", "华润信托", "单一资金信托", "稳健", 81, 7.9, 5.8, 5.3, 1.39, 1.36, 49],
-];
+  const DAYS = 504; // ~2 years
+  const DATES = dateRange("2024-04-01", DAYS);
 
-function createSimulatedProduct(spec, index) {
-  const [id, name, code, managerId, managerName, type, rating, score, annualReturn, maxDrawdown, vol, sharpe, calmar, riskTilt] = spec;
-  const labels = ["2025-01-03", "2025-01-31", "2025-02-28", "2025-03-28", "2025-04-25", "2025-05-30", "2025-06-27", "2025-07-25", "2025-08-29", "2025-09-26", "2025-10-31", "2025-11-28", "2025-12-31", "2026-01-30", "2026-02-27", "2026-03-27", "2026-04-30"];
-  const trend = annualReturn / 100 / 12;
-  const wave = vol / 100 / 8;
-  const navSeries = labels.map((_, i) => Number((1 + trend * i + Math.sin(i * 1.08 + index) * wave + Math.cos(i * 0.43 + index / 2) * wave * 0.45).toFixed(4)));
-  const benchmarkSeries = labels.map((_, i) => Number((1 + trend * i * 0.82 + Math.sin(i * 0.9 + 0.6) * wave * 0.72).toFixed(4)));
-  const peerSeries = labels.map((_, i) => Number((1 + trend * i * 0.75 + Math.sin(i * 0.76 + 1.4) * wave * 0.54).toFixed(4)));
-  let peak = navSeries[0];
-  const drawdown = navSeries.map((value, i) => {
-    peak = Math.max(peak, value);
-    const raw = ((value / peak - 1) * 100) - Math.max(0, Math.sin(i * 0.91 + index) * maxDrawdown * 0.12);
-    return Number(Math.max(-maxDrawdown, raw).toFixed(2));
+  // ---- Managers ----
+  const managers = [
+    {
+      id: "M01",
+      name: "华润信托",
+      type: "信托机构",
+      productCount: 18,
+      fundCount: 64,
+      conclusion: "整体能力较强，战略中枢稳定有效；战术配置在事件驱动场景下响应及时，胜率较高。",
+      risk: "策略权重对权益偏多，市场系统性回撤期间净值压力较大；TMT 集中度近期上升。",
+      stratSeed: 42,
+      stratColor: "#0f5cff",
+    },
+    {
+      id: "M02",
+      name: "管理人甲",
+      type: "私募证券",
+      productCount: 11,
+      fundCount: 36,
+      conclusion: "中枢偏稳健，长期收益贡献可观，但在风格切换阶段战术响应略迟。",
+      risk: "组合久期偏长；信用债池下沉度边际抬升，需关注信用利差走阔风险。",
+      stratSeed: 88,
+      stratColor: "#00a99d",
+    },
+    {
+      id: "M03",
+      name: "管理人乙",
+      type: "FOF 管理人",
+      productCount: 7,
+      fundCount: 22,
+      conclusion: "选基偏向 alpha 主动权益，组合分散度尚可；战术上对回撤管理偏被动。",
+      risk: "底层基金集中在两家主动管理人，单一管理人风险敞口较大。",
+      stratSeed: 137,
+      stratColor: "#ff7a1a",
+    },
+  ];
+
+  // Manager strategic benchmark series (synthetic)
+  managers.forEach((m) => {
+    const navSeries = genNav(m.stratSeed, DAYS, {
+      drift: m.id === "M01" ? 0.00040 : m.id === "M02" ? 0.00028 : 0.00032,
+      vol: m.id === "M01" ? 0.009 : m.id === "M02" ? 0.006 : 0.012,
+      shocks: m.id === "M03"
+        ? [{ day: 180, amt: -0.05 }, { day: 360, amt: -0.04 }]
+        : [{ day: 200, amt: -0.025 }],
+    });
+    m.benchmarkNav = navSeries;
+    m.benchmarkDD = drawdownSeries(navSeries);
+    // rolling sharpe (60d)
+    const window = 60;
+    const sharpe = [];
+    for (let i = 0; i < navSeries.length; i++) {
+      if (i < window) { sharpe.push(null); continue; }
+      const rets = [];
+      for (let j = i - window + 1; j <= i; j++) {
+        rets.push(navSeries[j] / navSeries[j - 1] - 1);
+      }
+      const mean = rets.reduce((a, b) => a + b, 0) / rets.length;
+      const variance = rets.reduce((a, b) => a + (b - mean) ** 2, 0) / rets.length;
+      const std = Math.sqrt(variance);
+      sharpe.push(std === 0 ? 0 : (mean * 252 - 0.025) / (std * Math.sqrt(252)));
+    }
+    m.rollingSharpe = sharpe;
+
+    // Tactical metrics
+    if (m.id === "M01") {
+      m.capabilities = {
+        env: { match: 0.78, winRate: 0.64, alpha: 0.058 },
+        evt: { response: 0.86, winRate: 0.71, alpha: 0.042 },
+      };
+    } else if (m.id === "M02") {
+      m.capabilities = {
+        env: { match: 0.62, winRate: 0.55, alpha: 0.031 },
+        evt: { response: 0.58, winRate: 0.49, alpha: 0.018 },
+      };
+    } else {
+      m.capabilities = {
+        env: { match: 0.71, winRate: 0.59, alpha: 0.046 },
+        evt: { response: 0.48, winRate: 0.52, alpha: 0.022 },
+      };
+    }
   });
-  const allocationDates = ["2025-01", "2025-03", "2025-05", "2025-07", "2025-09", "2025-11", "2026-01", "2026-03", "2026-04"];
-  const strategyNames = ["固定收益", "市场中性", "指数增强", "CTA", "套利", "现金"];
-  const colors = ["#3f7cff", "#00a99d", "#e15c3b", "#6b4ce6", "#ff9f1a", "#90a4bc"];
-  const base = [34 - riskTilt * 0.18, 18, riskTilt * 0.22, 12, 22 - riskTilt * 0.1, 14 - riskTilt * 0.06];
-  const columns = allocationDates.map((_, i) => {
-    const raw = base.map((value, j) => Math.max(1, value + Math.sin(i * 0.9 + j + index) * (2.4 + j * 0.35)));
-    const sum = raw.reduce((total, value) => total + value, 0);
-    return raw.map((value) => Number(((value / sum) * 100).toFixed(2)));
+
+  // ---- Products ----
+  // categories: 积极看多 / 谨慎看多 / 低相关 / 类固收
+  const CATEGORIES = [
+    { id: "agg",  name: "积极看多", color: "#ef3f3f", soft: "#fde8e8", desc: "权益中枢较高，主动承担市场 beta" },
+    { id: "mod",  name: "谨慎看多", color: "#ff7a1a", soft: "#fff1e5", desc: "适度暴露权益，重视风险预算" },
+    { id: "low",  name: "低相关",   color: "#6b4ce6", soft: "#ede8fc", desc: "与权益相关度低，作为分散工具" },
+    { id: "fix",  name: "类固收",   color: "#00a99d", soft: "#e0f5f3", desc: "以信用与利率债底仓为主" },
+  ];
+
+  const FEATURED = [
+    { id: "ROCK",  name: "磐石3.0",     count: 6, delta: 2,  color: "#0f5cff", soft: "#e8f0ff" },
+    { id: "QTR",   name: "类全委",       count: 4, delta: -1, color: "#6b4ce6", soft: "#ede8fc" },
+    { id: "PQTR",  name: "白金类全委",   count: 3, delta: 1,  color: "#00a99d", soft: "#e0f5f3" },
+  ];
+
+  // base list of products with seed config
+  const PROD_TPL = [
+    { id: "A108",  name: "磐石3.0-A108", code: "ZS-A108", catId: "agg", mgrId: "M01", rating: "A+", drift: 0.00050, vol: 0.013, shocks: [{day:200,amt:-0.045}], featured: ["ROCK"] },
+    { id: "B5",    name: "晨曦量化B5",   code: "QH-B005", catId: "mod", mgrId: "M02", rating: "A",  drift: 0.00038, vol: 0.009, shocks: [{day:210,amt:-0.025}] },
+    { id: "C3",    name: "稳益固收C3",   code: "WY-C003", catId: "fix", mgrId: "M01", rating: "A+", drift: 0.00018, vol: 0.0028, shocks: [] },
+    { id: "P001",  name: "磐石3.0-001", code: "ZS-001",  catId: "agg", mgrId: "M01", rating: "A",  drift: 0.00045, vol: 0.012, shocks: [{day:200,amt:-0.04}], featured: ["ROCK"] },
+    { id: "P002",  name: "磐石3.0-002", code: "ZS-002",  catId: "agg", mgrId: "M01", rating: "A-", drift: 0.00040, vol: 0.014, shocks: [{day:200,amt:-0.05}], featured: ["ROCK"] },
+    { id: "P003",  name: "磐石3.0-003", code: "ZS-003",  catId: "agg", mgrId: "M02", rating: "B+", drift: 0.00033, vol: 0.013, shocks: [{day:190,amt:-0.06}], featured: ["ROCK"] },
+    { id: "P004",  name: "磐石3.0-004", code: "ZS-004",  catId: "agg", mgrId: "M03", rating: "B",  drift: 0.00028, vol: 0.015, shocks: [{day:200,amt:-0.05},{day:380,amt:-0.03}], featured: ["ROCK"] },
+    { id: "P005",  name: "类全委-蓝筹", code: "QW-LZ01", catId: "mod", mgrId: "M01", rating: "A",  drift: 0.00036, vol: 0.008, shocks: [{day:200,amt:-0.022}], featured: ["QTR"] },
+    { id: "P006",  name: "类全委-平衡", code: "QW-PH02", catId: "mod", mgrId: "M02", rating: "A-", drift: 0.00030, vol: 0.0085, shocks: [{day:200,amt:-0.025}], featured: ["QTR"] },
+    { id: "P007",  name: "类全委-稳健", code: "QW-WJ03", catId: "mod", mgrId: "M01", rating: "B+", drift: 0.00027, vol: 0.007, shocks: [{day:210,amt:-0.022}], featured: ["QTR"] },
+    { id: "P008",  name: "类全委-动态", code: "QW-DT04", catId: "mod", mgrId: "M03", rating: "B",  drift: 0.00025, vol: 0.009, shocks: [{day:200,amt:-0.03},{day:400,amt:-0.02}], featured: ["QTR"] },
+    { id: "P009",  name: "白金类全委-1", code: "BJ-001", catId: "mod", mgrId: "M01", rating: "A+", drift: 0.00038, vol: 0.0075, shocks: [{day:200,amt:-0.018}], featured: ["PQTR"] },
+    { id: "P010",  name: "白金类全委-2", code: "BJ-002", catId: "mod", mgrId: "M01", rating: "A",  drift: 0.00033, vol: 0.0072, shocks: [{day:200,amt:-0.02}],  featured: ["PQTR"] },
+    { id: "P011",  name: "白金类全委-3", code: "BJ-003", catId: "mod", mgrId: "M02", rating: "A-", drift: 0.00030, vol: 0.008, shocks: [{day:200,amt:-0.022}], featured: ["PQTR"] },
+    { id: "P012",  name: "中证套利-Q1",  code: "TL-Q01", catId: "low", mgrId: "M02", rating: "A",  drift: 0.00029, vol: 0.0042, shocks: [] },
+    { id: "P013",  name: "CTA-趋势A",    code: "CTA-A1", catId: "low", mgrId: "M03", rating: "B+", drift: 0.00024, vol: 0.007, shocks: [{day:300,amt:-0.025}] },
+    { id: "P014",  name: "宏观对冲-G",   code: "MAC-G1", catId: "low", mgrId: "M02", rating: "B+", drift: 0.00026, vol: 0.0055, shocks: [] },
+    { id: "P015",  name: "稳益固收-短", code: "WY-S01",  catId: "fix", mgrId: "M01", rating: "A",  drift: 0.00014, vol: 0.0022, shocks: [] },
+    { id: "P016",  name: "稳益固收-中", code: "WY-M01",  catId: "fix", mgrId: "M02", rating: "A",  drift: 0.00016, vol: 0.0026, shocks: [] },
+    { id: "P017",  name: "稳益固收-增", code: "WY-Z01",  catId: "fix", mgrId: "M01", rating: "A-", drift: 0.00020, vol: 0.0034, shocks: [{day:320,amt:-0.008}] },
+    { id: "P018",  name: "信用精选-1",   code: "XY-001", catId: "fix", mgrId: "M03", rating: "B",  drift: 0.00017, vol: 0.0029, shocks: [{day:330,amt:-0.006}] },
+  ];
+
+  const products = PROD_TPL.map((p) => {
+    const seed = (p.id.charCodeAt(0) * 17 + p.id.charCodeAt(1) * 31) % 9999;
+    const nav = genNav(seed, DAYS, { drift: p.drift, vol: p.vol, shocks: p.shocks });
+    // benchmark: smoother version
+    const bench = genNav(seed + 1000, DAYS, { drift: p.drift * 0.85, vol: p.vol * 0.7, shocks: p.shocks.map(s => ({day:s.day, amt:s.amt*0.7})) });
+    const peer  = genNav(seed + 2000, DAYS, { drift: p.drift * 0.8, vol: p.vol * 0.9, shocks: p.shocks.map(s => ({day:s.day, amt:s.amt*0.85})) });
+    const dd = drawdownSeries(nav);
+    const ddFloor = Math.min(...dd);
+    const peerDD = Math.min(...drawdownSeries(peer));
+    const last = nav[nav.length - 1];
+    const startVal = nav[0];
+    const annualReturn = Math.pow(last / startVal, 252 / DAYS) - 1;
+    // Vol
+    const rets = nav.map((v, i) => i === 0 ? 0 : v / nav[i-1] - 1).slice(1);
+    const meanR = rets.reduce((a,b)=>a+b,0)/rets.length;
+    const variance = rets.reduce((a,b)=>a+(b-meanR)**2,0)/rets.length;
+    const vol = Math.sqrt(variance) * Math.sqrt(252);
+    const sharpe = vol === 0 ? 0 : (annualReturn - 0.025) / vol;
+    const calmar = ddFloor === 0 ? 0 : annualReturn / Math.abs(ddFloor);
+    const currentDD = dd[dd.length - 1];
+    // Recovery days (since last new high)
+    let recDays = 0;
+    let peak = nav[0];
+    for (let i = 0; i < nav.length; i++) {
+      if (nav[i] >= peak) { peak = nav[i]; recDays = 0; }
+      else recDays++;
+    }
+    // Allocation: 4 sleeves over time
+    const sleeves = ["权益主动", "权益量化", "固收增强", "商品/对冲"];
+    const targetMix = p.catId === "agg" ? [0.50, 0.25, 0.15, 0.10]
+                    : p.catId === "mod" ? [0.30, 0.25, 0.30, 0.15]
+                    : p.catId === "low" ? [0.10, 0.20, 0.20, 0.50]
+                    : [0.05, 0.10, 0.75, 0.10];
+    const allocPoints = 24; // monthly
+    const allocation = sleeves.map((name, idx) => {
+      const r2 = rng(seed + idx * 7);
+      const series = [];
+      for (let i = 0; i < allocPoints; i++) {
+        series.push(Math.max(0.02, targetMix[idx] + (r2()-0.5)*0.06));
+      }
+      return { name, series };
+    });
+    // normalize each timepoint
+    for (let t = 0; t < allocPoints; t++) {
+      const sum = allocation.reduce((a, s) => a + s.series[t], 0);
+      allocation.forEach(s => s.series[t] = s.series[t] / sum);
+    }
+    // Cash series
+    const cashR = rng(seed + 555);
+    const cashSeries = [];
+    for (let i = 0; i < allocPoints; i++) {
+      cashSeries.push(0.05 + cashR() * 0.08 + (p.catId === "fix" ? 0.05 : 0));
+    }
+    // Strategy metrics
+    const strategyMetrics = {
+      singleAdj: 0.08 + Math.random()*0.06,
+      cumAdj: 0.35 + Math.random()*0.25,
+      concentration: 0.55 + Math.random()*0.25,
+      cashBuffer: cashSeries.reduce((a,b)=>a+b,0)/cashSeries.length,
+    };
+    // labels
+    const labels = [];
+    if (Math.abs(ddFloor) > 0.06) labels.push("高回撤");
+    if (annualReturn > 0.10) labels.push("收益突出");
+    if (vol < 0.05) labels.push("低波动");
+    if (sharpe > 1.2) labels.push("高夏普");
+    if (p.featured) labels.push(...p.featured.map(fid => FEATURED.find(f=>f.id===fid).name));
+    // conclusion
+    const conclusion = annualReturn > 0.08
+      ? "长期收益曲线稳健，风险预算控制在合理范围。"
+      : annualReturn > 0.04
+      ? "收益中位，回撤管理可接受，建议观察战术响应。"
+      : "近期收益与同类相比偏弱，关注策略适应性。";
+    const risk = Math.abs(ddFloor) > 0.06
+      ? "近 12 月最大回撤已超阈值，需重点关注流动性与赎回压力。"
+      : currentDD < -0.025
+      ? "当前处于阶段性回撤，恢复期已超 30 天。"
+      : "无显著风险信号。";
+    return {
+      ...p,
+      manager: managers.find(m => m.id === p.mgrId).name,
+      managerId: p.mgrId,
+      type: p.catId === "fix" ? "类固收" : p.catId === "low" ? "对冲/多元" : "权益多策略",
+      score: Math.round((annualReturn * 100 + sharpe * 8 - Math.abs(ddFloor) * 60) * 10) / 10,
+      nav: Math.round(last * 10000) / 10000,
+      latestDate: DATES[DATES.length - 1],
+      maxDrawdown: ddFloor,
+      peerMaxDrawdown: peerDD,
+      currentDrawdown: currentDD,
+      recoveryDays: recDays,
+      vol,
+      calmar,
+      annualReturn,
+      sharpe,
+      conclusion,
+      risk,
+      labels,
+      navSeries: nav,
+      benchmarkSeries: bench,
+      peerSeries: peer,
+      drawdown: dd,
+      allocation,
+      cashSeries,
+      strategyMetrics,
+      events: [],
+    };
   });
-  const allocation = {
-    dates: allocationDates,
-    series: strategyNames.map((strategy, strategyIndex) => ({
-      name: strategy,
-      color: colors[strategyIndex],
-      values: columns.map((column) => column[strategyIndex]),
-    })),
+
+  // Events / 强关注 list
+  const STAGES = ["待一线确认","待客户触达","已触达","已完成"];
+  const watchlist = [
+    // 产品驱动
+    { id: "EVT01", productId: "A108", scene: "最大回撤超阈值", driver: "产品驱动", tag: "预警", level: "high", reason: "近 60 日最大回撤达 -7.8%，超阈值 -6%", action: "立即一线复盘，准备客户沟通脚本", stage: 0 },
+    { id: "EVT02", productId: "P004", scene: "净值异常下跌",   driver: "产品驱动", tag: "预警", level: "high", reason: "T-3 日净值单日跌 -2.4%，归因尚未确认", action: "联系管理人核实，启动 SOP-A 流程", stage: 1 },
+    { id: "EVT03", productId: "P002", scene: "回撤恢复期延长", driver: "产品驱动", tag: "安抚", level: "mid",  reason: "当前回撤 -3.6%，已 48 日未创新高", action: "向持有客户发送月度安抚说明", stage: 1 },
+    { id: "EVT05", productId: "P010", scene: "开放期可营销",   driver: "产品驱动", tag: "增值", level: "low",  reason: "白金类全委-2 即将开放申购", action: "向意向客户推送营销机会", stage: 2 },
+    { id: "EVT07", productId: "P018", scene: "卡玛明显恶化",   driver: "产品驱动", tag: "预警", level: "low",  reason: "卡玛比率连续 2 个月低于 0.6", action: "纳入观察池，下次评审讨论", stage: 0 },
+    { id: "EVT08", productId: "P008", scene: "规模快速下降",   driver: "产品驱动", tag: "预警", level: "mid",  reason: "近 30 日规模下降 18%", action: "确认是否存在流动性匹配问题", stage: 1 },
+    // 投研驱动 - 积极看多
+    { id: "EVT10", productId: "A108", scene: "A股·沪深300 单日跌幅 ≥ 3%", driver: "投研驱动", tag: "预警", level: "high", reason: "沪深300 当日 -3.4%，触发宽基跌幅阈值", action: "评估积极看多池整体敞口，准备客户沟通模板", stage: 0, bigClass: "agg" },
+    { id: "EVT11", productId: "P003", scene: "量化指增·单周回撤 ≥ 5%",    driver: "投研驱动", tag: "预警", level: "high", reason: "近 5 日累计 -5.6%，超量化指增单周阈值", action: "复盘超额来源与拥挤度，确认是否启动减仓", stage: 0, bigClass: "agg" },
+    { id: "EVT12", productId: "P002", scene: "港股·恒生科技 ≥ 4%",        driver: "投研驱动", tag: "安抚", level: "mid",  reason: "恒生科技单日 -4.6%，组合港股敞口 18%", action: "测算冲击，准备港股敞口说明材料", stage: 1, bigClass: "agg" },
+    { id: "EVT13", productId: "P001", scene: "美股·纳斯达克 ≥ 3%",        driver: "投研驱动", tag: "安抚", level: "mid",  reason: "纳斯达克 -3.2%，QDII 敞口受影响", action: "盘前向 QDII 持仓客户群推送说明", stage: 1, bigClass: "agg" },
+    // 投研驱动 - 谨慎看多
+    { id: "EVT14", productId: "B5",   scene: "多策略·单周回撤(均衡) ≥ 3%", driver: "投研驱动", tag: "预警", level: "mid",  reason: "近 5 日 -3.1%，均衡型阈值触发", action: "向投顾团队同步风险预算调整", stage: 0, bigClass: "mod" },
+    { id: "EVT15", productId: "P005", scene: "宏观·货币政策重大转向",      driver: "投研驱动", tag: "安抚", level: "mid",  reason: "央行降准 25bp，权益情绪改善但债端承压", action: "评估谨慎看多池久期与权益再平衡", stage: 1, bigClass: "mod" },
+    { id: "EVT16", productId: "P006", scene: "10Y 国债期货 ≥ 1%",          driver: "投研验证", tag: "预警", level: "mid",  reason: "10Y 国债期货 -1.2%，已持续 2 日下跌", action: "检视谨慎看多池固收敞口", stage: 0, bigClass: "mod" },
+    // 投研驱动 - 低相关
+    { id: "EVT17", productId: "P013", scene: "CTA·单周回撤 ≥ 3%",          driver: "投研驱动", tag: "预警", level: "mid",  reason: "CTA 趋势策略近 5 日 -3.4%", action: "确认交易量变化与策略拥挤度", stage: 0, bigClass: "low" },
+    { id: "EVT18", productId: "P012", scene: "套利·单周回撤 ≥ 2.5%",       driver: "投研驱动", tag: "预警", level: "low",  reason: "套利策略 -2.7%，基差快速收敛", action: "短期观察，暂不调整", stage: 0, bigClass: "low" },
+    { id: "EVT19", productId: "P014", scene: "COMEX 黄金 ≥ 5%",            driver: "投研驱动", tag: "安抚", level: "low",  reason: "COMEX 黄金单日 -5.2%", action: "向贵金属配置客户预先沟通", stage: 2, bigClass: "low" },
+    { id: "EVT20", productId: "P013", scene: "商品·黑色系板块 ≥ 5%",       driver: "投研驱动", tag: "预警", level: "low",  reason: "螺纹钢、铁矿、焦炭单日均跌超 5%", action: "评估 CTA 趋势仓位贡献", stage: 0, bigClass: "low" },
+    // 投研驱动 - 类固收
+    { id: "EVT21", productId: "C3",   scene: "类固收·单周回撤 ≥ 1%",       driver: "投研驱动", tag: "预警", level: "mid",  reason: "稳益固收 C3 近 5 日 -1.1%，类固收阈值触发", action: "排查信用债持仓集中度", stage: 0, bigClass: "fix" },
+    { id: "EVT22", productId: "P017", scene: "10Y 国债期货 ≥ 1%",          driver: "投研驱动", tag: "预警", level: "mid",  reason: "10Y 国债期货 -1.2%，利率久期受压", action: "缩短久期或对冲利率敞口", stage: 1, bigClass: "fix" },
+  ];
+
+  // ---- HTML escape ----
+  function escape(s) {
+    if (s == null) return "";
+    return String(s).replace(/[&<>"']/g, (c) => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+    }[c]));
+  }
+
+  // Validate
+  function validate() {
+    const errs = [];
+    products.forEach((p) => {
+      if (!p.id || !p.name || !p.navSeries || p.navSeries.length === 0) errs.push("Bad product: " + p.id);
+    });
+    if (errs.length) console.warn("Data validation:", errs);
+    return errs.length === 0;
+  }
+
+  // 投研驱动阈值规则 - by 大类
+  const THRESHOLDS = [
+    { catId: "agg", catName: "积极看多", color: "#ef3f3f", soft: "#fde8e8", rules: [
+      { item: "产品回撤", text: "量化指增（除红利指增）单周回撤 ≥ 5%；最大回撤 ≥ 20%" },
+      { item: "产品回撤", text: "红利指增单周回撤 ≥ 3%；最大回撤 ≥ 10%" },
+      { item: "产品回撤", text: "主观多头单周回撤 ≥ 5%；最大回撤 ≥ 20%" },
+      { item: "产品回撤", text: "多策略单周回撤（进取）≥ 4%；最大回撤 ≥ 10%" },
+      { item: "A 股",     text: "沪深300 / A500 / 中证500 / 中证1000 / 中证红利 单日跌幅 ≥ 3.0%；重要点位" },
+      { item: "港股",     text: "恒生指数 ≥ 3.0%；恒生科技 ≥ 4.0%；重要点位" },
+      { item: "美股",     text: "标普500 / 纳斯达克 单日跌幅 ≥ 3.0%；重要点位" },
+      { item: "量化指增", text: "监管政策变化、交易量骤降带来的策略拥挤度" },
+    ]},
+    { catId: "mod", catName: "谨慎看多", color: "#ff7a1a", soft: "#fff1e5", rules: [
+      { item: "产品回撤", text: "多策略单周回撤（稳健）≥ 2%；（均衡）≥ 3%" },
+      { item: "产品回撤", text: "宏观策略单周回撤 ≥ 5%" },
+      { item: "A 股",     text: "沪深300 / A500 / 中证500 / 中证1000 / 中证红利 单日跌幅 ≥ 3.0%；重要点位" },
+      { item: "国内债券", text: "10 年期国债期货单日价格持续下跌 ≥ 1%" },
+      { item: "宏观",     text: "货币政策重大转向" },
+    ]},
+    { catId: "low", catName: "低相关", color: "#6b4ce6", soft: "#ede8fc", rules: [
+      { item: "产品回撤", text: "CTA 策略单周回撤 ≥ 3%" },
+      { item: "产品回撤", text: "T0 / 中性 / 套利（如有）单周回撤 ≥ 2.5%" },
+      { item: "策略环境", text: "CTA / T0 / 中性 / 套利 交易规则变化、交易量骤降带来的策略拥挤度" },
+      { item: "贵金属",   text: "COMEX 黄金 / 沪金 单日跌幅 ≥ 5.0%" },
+      { item: "大宗商品", text: "能源类、黑色系、有色系、农产品、化工类 各板块多品种单日跌幅 ≥ 5.0%" },
+    ]},
+    { catId: "fix", catName: "类固收", color: "#00a99d", soft: "#e0f5f3", rules: [
+      { item: "产品回撤", text: "单周回撤 ≥ 1%" },
+      { item: "国内债券", text: "10 年期国债期货单日价格持续下跌 ≥ 1%" },
+    ]},
+  ];
+
+  const root = typeof window !== "undefined" ? window : globalThis;
+  root.IRDATA = {
+    DATES,
+    DAYS,
+    CATEGORIES,
+    FEATURED,
+    products,
+    managers,
+    watchlist,
+    STAGES,
+    THRESHOLDS,
+    escape,
+    validate,
   };
-  const turnover = allocationDates.slice(1).map((_, i) => allocation.series.reduce((sum, serie) => sum + Math.abs(serie.values[i + 1] - serie.values[i]), 0));
-  const cumulativeTurnover = turnover.reduce((sum, value) => sum + value, 0);
-  const latestNav = navSeries.at(-1);
-  return {
-    id,
-    name,
-    code,
-    sourceFile: "模拟产品池数据",
-    managerId,
-    manager: managerName,
-    type,
-    rating,
-    score,
-    nav: latestNav.toFixed(4),
-    latestDate: "2026-04-30",
-    maxDrawdown,
-    peerMaxDrawdown: Number((maxDrawdown * 1.18).toFixed(2)),
-    currentDrawdown: Math.abs(drawdown.at(-1)),
-    recoveryDays: Math.round(20 + maxDrawdown * 9),
-    vol,
-    calmar,
-    annualReturn,
-    sharpe,
-    conclusion: `${name}为模拟产品池样本，年化收益约${annualReturn.toFixed(1)}%，最大回撤约${maxDrawdown.toFixed(1)}%，用于产品池筛选、横截面指标和对比流程演示。`,
-    risk: `${name}当前主要观察点为策略暴露、调仓节奏和回撤修复能力，正式接入后需替换为真实净值与持仓数据。`,
-    labels,
-    navSeries,
-    benchmarkSeries,
-    peerSeries,
-    drawdown,
-    allocation,
-    cashSeries: allocation.series.find((serie) => serie.name === "现金").values,
-    strategyMetrics: [
-      ["单期最大调仓", `${Math.max(...turnover).toFixed(2)}%`],
-      ["累计调仓幅度", `${cumulativeTurnover.toFixed(2)}%`],
-      ["调仓胜率", `${Math.max(42, Math.min(72, 58 + (score - 80) * 0.7)).toFixed(1)}%`],
-    ],
-    quality: null,
-    events: ["该产品为模拟产品池样本", "净值、配置和指标均为前端确定性模拟数据"],
-  };
-}
 
-products = [...products, ...simulatedProductSpecs.map((spec, index) => createSimulatedProduct(spec, index))];
-managers.forEach((item) => {
-  item.productCount = products.filter((productItem) => productItem.managerId === item.id).length;
-});
-
-const indicatorGroups = {
-  业绩: [
-    ["年化收益", "反映产品收益位置，适合与基准及同类中位数对比。"],
-    ["周胜率", "衡量产品正收益周数占比，辅助判断收益稳定性。"],
-    ["超额收益", "衡量相对基准的贡献，是推荐优先级的重要依据。"],
-  ],
-  风险: [
-    ["最大回撤", "衡量净值从高点到低点的最大损失。"],
-    ["回撤修复时间", "衡量从回撤底部恢复到前高所需时间。"],
-    ["年化波动率", "衡量收益波动幅度，越低代表体验越平稳。"],
-  ],
-  行为: [
-    ["策略集中度 HHI", "衡量策略配置是否过度集中。"],
-    ["现金缓冲度", "衡量组合应对赎回和波动的安全垫。"],
-    ["调仓胜率", "衡量调仓后是否提升组合表现。"],
-  ],
-};
-
-const sopMetrics = {
-  risk: [
-    ["最大回撤超阈值", "2", "触发内部预警线"],
-    ["净值异常下跌", "1", "短期跌幅放大"],
-    ["波动率突然上升", "1", "近阶段波动跳升"],
-    ["夏普持续下降", "2", "风险收益效率走弱"],
-    ["卡玛明显恶化", "1", "回撤收益比恶化"],
-    ["规模快速下降", "1", "期末规模变化异常"],
-  ],
-  service: [
-    ["待一线确认", "8", "含2条高优先级"],
-    ["待客户触达", "126", "安抚/提示类"],
-    ["可营销机会", "42", "增值服务触发"],
-    ["今日到期任务", "5", "T日内处理"],
-  ],
-};
-
-const focusEvents = [
-  {
-    id: "risk-b5-dd",
-    productId: "B5",
-    module: "风险事件预警",
-    target: "B5",
-    scene: "最大回撤超过阈值",
-    driver: "产品驱动",
-    label: "预警",
-    level: "高",
-    trigger: "最大回撤突破当前风险等级内部阈值",
-    nextAction: "联系管理人确认回撤来源、控风险动作和修复节奏",
-    status: "待内部处理",
-    customers: "持有客户待接入",
-  },
-  {
-    id: "risk-a108-nav",
-    productId: "A108",
-    module: "风险事件预警",
-    target: "A108",
-    scene: "短期净值异常下跌",
-    driver: "产品驱动",
-    label: "预警",
-    level: "中",
-    trigger: "短期净值跌幅超过同类波动容忍区间",
-    nextAction: "复核估值和持仓驱动，判断是否需要形成统一解释口径",
-    status: "跟踪中",
-    customers: "持有客户 128户",
-  },
-  {
-    id: "risk-c3-vol",
-    productId: "C3",
-    module: "风险事件预警",
-    target: "C3",
-    scene: "波动率突然上升",
-    driver: "产品驱动",
-    label: "预警",
-    level: "高",
-    trigger: "年化波动率较前期明显抬升，权益相关暴露贡献较高",
-    nextAction: "拆分权益、CTA和现金暴露变化，确认是否需要降波动动作",
-    status: "待确认应对口径",
-    customers: "持有客户待接入",
-  },
-  {
-    id: "risk-b5-sharpe",
-    productId: "B5",
-    module: "风险事件预警",
-    target: "B5",
-    scene: "夏普持续下降",
-    driver: "产品驱动",
-    label: "预警",
-    level: "中",
-    trigger: "滚动夏普连续下降，收益补偿不足以覆盖新增波动",
-    nextAction: "观察收益来源是否切换，要求管理人解释风险收益效率变化",
-    status: "跟踪中",
-    customers: "持有客户待接入",
-  },
-  {
-    id: "risk-c3-calmar",
-    productId: "C3",
-    module: "风险事件预警",
-    target: "C3",
-    scene: "卡玛明显恶化",
-    driver: "产品驱动",
-    label: "预警",
-    level: "高",
-    trigger: "卡玛比率明显下行，回撤对收益的侵蚀加重",
-    nextAction: "结合最大回撤和修复周期评估是否升级为客户触达事件",
-    status: "待内部处理",
-    customers: "持有客户待接入",
-  },
-  {
-    id: "risk-a108-scale",
-    productId: "A108",
-    module: "风险事件预警",
-    target: "A108",
-    scene: "产品规模快速下降",
-    driver: "产品驱动",
-    label: "预警",
-    level: "中",
-    trigger: "期末产品规模较前期快速下降，可能影响组合流动性和配置稳定性",
-    nextAction: "确认规模变化是否来自集中赎回，并评估后续组合调整压力",
-    status: "跟踪中",
-    customers: "持有客户 128户",
-  },
-  {
-    id: "service-a108",
-    productId: "A108",
-    module: "一线/客户触达",
-    target: "A108",
-    scene: "产品回撤安抚",
-    driver: "产品驱动",
-    label: "安抚",
-    level: "中",
-    trigger: "产品回撤触发客户陪伴场景",
-    nextAction: "生成一线话术，提醒客户关注持有体验",
-    status: "待一线确认",
-    customers: "128户",
-  },
-  {
-    id: "service-upsell",
-    productId: "A108",
-    module: "一线/客户触达",
-    target: "A108",
-    scene: "业绩向好",
-    driver: "产品驱动",
-    label: "增值",
-    level: "机会",
-    trigger: "产品业绩连续表现优于模拟同类中位数",
-    nextAction: "生成增值服务内容，供一线二次营销",
-    status: "可营销",
-    customers: "42户",
-  },
-  {
-    id: "service-expiry",
-    productId: "B5",
-    module: "一线/客户触达",
-    target: "B5",
-    scene: "月度运作信息",
-    driver: "产品驱动",
-    label: "增值",
-    level: "低",
-    trigger: "月度运作基本信息定期触发",
-    nextAction: "补齐月度运作模板，推送给一线或客户",
-    status: "待生成内容",
-    customers: "持有客户待接入",
-  },
-];
-
-const tacticalDiagnostics = [
-  {
-    productId: "B5",
-    product: "B5",
-    maxSingle: "53.94%",
-    cumulative: "550.92%",
-    direction: "增配市场中性、指数增强、量化多头；大幅降低现金",
-    frequency: "62次",
-    marketTag: "震荡修复 / 低波动优先",
-    match: "72%",
-    post1: "+0.09%",
-    post4: "+0.55%",
-    winRate: "62.3%",
-    stability: "较稳",
-  },
-  {
-    productId: "C3",
-    product: "C3",
-    maxSingle: "41.34%",
-    cumulative: "662.63%",
-    direction: "增配指数增强、主观选股、量化多头；降低现金",
-    frequency: "60次",
-    marketTag: "权益修复 / 风险偏好回升",
-    match: "64%",
-    post1: "-0.04%",
-    post4: "0.00%",
-    winRate: "48.3%",
-    stability: "待观察",
-  },
-];
-
-const strategyCenterDiagnostics = [
-  {
-    product: "B5",
-    center: "稳健中枢",
-    staticReturn: "7.4%",
-    actualReturn: "7.02%",
-    staticDrawdown: "5.8%",
-    actualDrawdown: "6.19%",
-    staticSharpe: "1.37",
-    actualSharpe: "1.44",
-    verdict: "战略中枢有效",
-  },
-  {
-    product: "C3",
-    center: "进取中枢",
-    staticReturn: "8.1%",
-    actualReturn: "6.18%",
-    staticDrawdown: "14.6%",
-    actualDrawdown: "17.25%",
-    staticSharpe: "0.72",
-    actualSharpe: "0.61",
-    verdict: "权益中枢偏进取",
-  },
-];
-
-const marketStateTags = [
-  ["权益修复", "沪深300/权益基准上行，适合提升指数增强、量化多头、主观选股等权益相关暴露。"],
-  ["震荡修复", "权益方向不稳定但波动下降，适合保留市场中性、套利、CTA等低相关策略。"],
-  ["权益承压", "权益基准回撤或波动上升，观察是否降权益、升现金或低相关策略。"],
-  ["低波动优先", "组合体验目标优先，调仓应更看重回撤控制和收益平滑。"],
-];
-
-const months = [
-  "2024-05",
-  "2024-06",
-  "2024-07",
-  "2024-08",
-  "2024-09",
-  "2024-10",
-  "2024-11",
-  "2024-12",
-  "2025-01",
-  "2025-02",
-  "2025-03",
-  "2025-04",
-  "2025-05",
-  "2025-06",
-  "2025-07",
-  "2025-08",
-  "2025-09",
-  "2025-10",
-  "2025-11",
-  "2025-12",
-];
+  // Compatibility for the legacy Node-based metric tests and older static app helpers.
+  // The React frontend reads IRDATA; these globals keep existing utility tests useful.
+  root.products = products.map((p) => ({
+    ...p,
+    labels: DATES,
+    allocation: {
+      dates: Array.from({ length: p.allocation[0].series.length }, (_, i) => `M${i + 1}`),
+      series: p.allocation.map((s) => ({ name: s.name, values: s.series })),
+    },
+  }));
+  root.managers = managers;
+  root.focusEvents = watchlist;
+  root.indicatorGroups = [];
+  root.sopMetrics = [];
+  root.tacticalDiagnostics = [];
+  root.strategyCenterDiagnostics = [];
+  root.marketStateTags = [];
+  validate();
+})();
